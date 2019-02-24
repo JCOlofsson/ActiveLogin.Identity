@@ -10,15 +10,6 @@ open ActiveLogin.Identity.Swedish.FSharp
 open Generators
 open FsCheck
 
-type TwoEqualPins() =
-    static member TwoEqualPins() : Arbitrary<SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber> =
-        gen {
-            let! pin = validPin
-            return (pin, pin)
-        } |> Arb.fromGen
-let twoEqualPinsConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<TwoEqualPins>] }
-let testPropIdentical : string -> (SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber -> unit) -> Test = 
-    testPropertyWithConfig twoEqualPinsConfig
 
 type TwoPins() =
     static member TwoPins() : Arbitrary<SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber> =

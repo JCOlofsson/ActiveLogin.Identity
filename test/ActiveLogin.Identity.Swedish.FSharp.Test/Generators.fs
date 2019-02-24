@@ -94,3 +94,13 @@ type ValidPin() =
         validPin |> Arb.fromGen
 let validPinConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ValidPin>]}
 let testPropValidPin : string -> (SwedishPersonalIdentityNumber -> unit) -> Test = testPropertyWithConfig validPinConfig
+
+type TwoEqualPins() =
+    static member TwoEqualPins() : Arbitrary<SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber> =
+        gen {
+            let! pin = validPin
+            return (pin, pin)
+        } |> Arb.fromGen
+let twoEqualPinsConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<TwoEqualPins>] }
+let testPropIdentical : string -> (SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber -> unit) -> Test = 
+    testPropertyWithConfig twoEqualPinsConfig
