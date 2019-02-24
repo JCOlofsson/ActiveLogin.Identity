@@ -15,9 +15,9 @@ let tests =
             let pin = 
                 SwedishPersonalIdentityNumberTestData.raw12DigitStrings 
                 |> Array.head
-                |> quickParse
+                |> quickParseR
 
-            pin |> Expect.isSome "Should be a pin"
+            pin |> Expect.isOk "Should be a pin"
           } 
           test "isTestNumber returns true for a test number" {
             let pin = SwedishPersonalIdentityNumberTestData.getRandom()

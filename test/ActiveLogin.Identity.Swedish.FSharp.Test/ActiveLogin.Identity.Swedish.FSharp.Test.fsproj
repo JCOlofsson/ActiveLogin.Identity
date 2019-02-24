@@ -10,7 +10,10 @@
 
   <ItemGroup>
     <Compile Include="PinTestHelpers.fs" />
+    <Compile Include="Generators.fs" />
     <Compile Include="TestDataTests.fs" />
+    <Compile Include="SwedishPersonalIdentityNumber_create.fs" />
+    <Compile Include="SwedishPersonalIdentityNumber_equality.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
