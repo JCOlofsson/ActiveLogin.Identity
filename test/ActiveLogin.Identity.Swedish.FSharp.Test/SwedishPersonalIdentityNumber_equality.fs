@@ -35,25 +35,29 @@ let tests =
             fun (pin1, pin2) ->
                 pin1.Equals(pin2) =! true
                 pin2.Equals(pin1) =! true
+
           testPropIdentical "Identical pins are equal when using .Equals() and one pin is object" <|
             fun (pin1, pin2) ->
                 let pin2 = pin2 :> obj
-
                 pin1.Equals(pin2) =! true
                 pin2.Equals(pin1) =! true
+
           testPropDifferent "Different pins are not equal" <|
             fun (pin1, pin2) ->
                 pin1 <> pin2 ==> lazy 
                 pin1 <>! pin2
                 pin2 <>! pin1
+
           testPropDifferent "Different pins are not equal using .Equals()" <|
             fun (pin1, pin2) ->
                 pin1 <> pin2 ==> lazy
                 pin1.Equals(pin2) =! false
                 pin2.Equals(pin1) =! false
+
           testPropValidPin "A pin is not equal to null using .Equals()" <|
             fun (pin) ->
                 pin.Equals(null) =! false
+
           testPropValidPin "A pin is not equal to object null using .Equals()" <|
             fun pin ->
                 let nullObject = null :> obj
