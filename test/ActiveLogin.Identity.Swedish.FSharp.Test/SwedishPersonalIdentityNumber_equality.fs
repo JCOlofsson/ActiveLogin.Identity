@@ -26,8 +26,8 @@ let tests =
     testList "equality" 
         [ testPropertyWithConfig twoEqualPinsConfig "Identical pins are equal when using operator" <|
             fun (pin1: SwedishPersonalIdentityNumber, pin2: SwedishPersonalIdentityNumber) ->
-                pin1 =! pin2 
-                pin2 =! pin1 
+                pin1 = pin2 =! true
+                pin2 = pin1 =! true
           
           testPropertyWithConfig twoEqualPinsConfig "Identical pins are equal when using .Equals()" <|
             fun (pin1: SwedishPersonalIdentityNumber, pin2: SwedishPersonalIdentityNumber) ->
@@ -43,8 +43,8 @@ let tests =
           testPropertyWithConfig twoPinsConfig "Different pins are not equal" <|
             fun (pin1: SwedishPersonalIdentityNumber, pin2: SwedishPersonalIdentityNumber) ->
                 pin1 <> pin2 ==> lazy 
-                pin1 <>! pin2
-                pin2 <>! pin1
+                pin1 <> pin2 =! true
+                pin2 <> pin1 =! true
 
           testPropertyWithConfig twoPinsConfig "Different pins are not equal using .Equals()" <|
             fun (pin1: SwedishPersonalIdentityNumber, pin2: SwedishPersonalIdentityNumber) ->

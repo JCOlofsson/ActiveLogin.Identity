@@ -31,7 +31,7 @@ let tests =
         [ testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string with plus delimiter" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
-                pin =! Ok expected
+                pin |> Expect.equalPin expected
 
           testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string for person the year they turn 100" <|
             fun (input, expected: SwedishPersonalIdentityNumber) ->
@@ -44,17 +44,17 @@ let tests =
                     | Ok y -> y 
                     | Error e -> e |> failwithf "Test setup error %A"
                 let pin = input |> SwedishPersonalIdentityNumber.parseInSpecificYear yearTurning100
-                pin =! Ok expected
+                pin |> Expect.equalPin expected
 
           testPropertyWithConfig valid10DigitWithDashConfig "Can parse valid string with dash delimiter" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
-                pin =! Ok expected
+                pin |> Expect.equalPin expected
 
           testPropertyWithConfig pin12DigitStringConfig "Can parse 12 digit string" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
-                pin =! Ok expected
+                pin |> Expect.equalPin expected
         ]
 
         // Handled!

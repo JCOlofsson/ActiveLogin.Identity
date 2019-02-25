@@ -2,6 +2,8 @@ module ActiveLogin.Identity.Swedish.FSharp.Test.PinTestHelpers
 open ActiveLogin.Identity.Swedish.FSharp
 open ActiveLogin.Identity.Swedish.FSharp.TestData
 open System
+open Swensen.Unquote
+open Expecto.Flip
 
 
 let quickParseR (str:string) = 
@@ -40,3 +42,16 @@ let random10DigitWithDashDelimiter =
         if tenDigit.Contains("+") |> not then
             yield (tenDigit, pin)
     }
+
+module Expect =
+    let equalPin (expected: SwedishPersonalIdentityNumber) (actual: Result<SwedishPersonalIdentityNumber,_>) =
+        actual |> Expect.isOk "should be ok"
+        match actual with
+        | Error _ -> failwith "test error"
+        | Ok pin ->
+            pin.Year =! expected.Year
+            pin.Month =! expected.Month
+            pin.Day =! expected.Day
+            pin.BirthNumber =! expected.BirthNumber
+            pin.Checksum =! expected.Checksum
+
