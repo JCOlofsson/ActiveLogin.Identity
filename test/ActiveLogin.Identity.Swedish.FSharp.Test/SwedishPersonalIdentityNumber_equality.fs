@@ -16,9 +16,7 @@ type TwoPins() =
     static member TwoPins() : Arbitrary<SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber> =
         gen {
             let pin1 = SwedishPersonalIdentityNumberTestData.getRandom()
-            printfn "%s" (SwedishPersonalIdentityNumber.to12DigitString pin1)
             let pin2 = SwedishPersonalIdentityNumberTestData.getRandom()
-            printfn "%s" (SwedishPersonalIdentityNumber.to12DigitString pin2)
             return (pin1, pin2)
         } |> Arb.fromGen
 let twoPinsConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<TwoPins>] }
