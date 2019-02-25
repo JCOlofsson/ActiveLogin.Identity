@@ -13,28 +13,28 @@ open Generators
 [<Tests>]
 let tests =
     testList "create" 
-        [ testPropInvalidYear "Invalid year" <|
+        [ testPropertyWithConfig invalidYearConfig "Invalid year" <|
             fun values ->
                 let result = 
                     values
                     |> SwedishPersonalIdentityNumber.create
                 result =! Error (InvalidYear values.Year) 
 
-          testPropInvalidMonth "Invalid month" <|
+          testPropertyWithConfig invalidMonthConfig "Invalid month" <|
             fun values ->
                 let result = 
                     values
                     |> SwedishPersonalIdentityNumber.create
                 result =! Error (InvalidMonth values.Month)
 
-          testPropInvalidDay "Invalid day" <|
+          testPropertyWithConfig invalidDayConfig "Invalid day" <|
             fun values ->
                 let result =
                     values
                     |> SwedishPersonalIdentityNumber.create
                 result =! Error (InvalidDayAndCoordinationDay values.Day)
 
-          testPropValidValues "Possible coordination-number day" <|
+          testPropertyWithConfig validValuesConfig "Possible coordination-number day" <|
             fun values ->
                 let coordinationDay = values.Day + 60
                 let result =
@@ -42,20 +42,20 @@ let tests =
                     |> SwedishPersonalIdentityNumber.create
                 result =! Error (InvalidDay coordinationDay)
 
-          testPropInvalidBirthNumber "Invalid birthnumber" <|
+          testPropertyWithConfig invalidBirthNumberConfig "Invalid birthnumber" <|
             fun values ->
                 let result =
                     values
                     |> SwedishPersonalIdentityNumber.create
                 result =! Error (InvalidBirthNumber values.BirthNumber)
 
-          testPropValidValues "With all other values valid only 1 out of 10 checksums is valid" <|
+          testPropertyWithConfig validValuesConfig "With all other values valid only 1 out of 10 checksums is valid" <|
             fun values ->
                 let isValid x = match x with Ok _ -> true | Error _ -> false
                 let results =
                     [ 0..9 ]
                     |> List.map (fun checksum -> 
-                        { values with Checksum = checksum }
+                        { values with SwedishPersonalIdentityNumberValues.Checksum = checksum }
                         |> SwedishPersonalIdentityNumber.create) 
                 let numValid = results |> List.filter isValid |> List.length 
                 numValid =! 1

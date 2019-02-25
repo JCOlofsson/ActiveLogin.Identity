@@ -1,14 +1,13 @@
 module ActiveLogin.Identity.Swedish.FSharp.Test.SwedishPersonalIdentityNumber_parse
 
 open Expecto
-open Expecto.Flip
 open Swensen.Unquote
 open ActiveLogin.Identity.Swedish.FSharp
 open FsCheck
 open ActiveLogin.Identity.Swedish.FSharp.TestData
 open PinTestHelpers
-open FsCheck
 open Generators
+
 
 type Valid10DigitWithPlusDelimiter() =
     static member ValidWithPlusDelimiter : Arbitrary<string * SwedishPersonalIdentityNumber> =
@@ -17,8 +16,6 @@ type Valid10DigitWithPlusDelimiter() =
         } |> Arb.fromGen
 let valid10DigitWithPlusConfig = 
     { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid10DigitWithPlusDelimiter> ] }
-let testPropValid10DigitWithPlus : string -> (string * SwedishPersonalIdentityNumber -> unit) -> Test = 
-    testPropertyWithConfig valid10DigitWithPlusConfig
 
 type Valid10DigitWithDashDelimiter() =
     static member ValidWithDashDelimiter : Arbitrary<string * SwedishPersonalIdentityNumber> =
@@ -27,20 +24,17 @@ type Valid10DigitWithDashDelimiter() =
         } |> Arb.fromGen
 let valid10DigitWithDashConfig = 
     { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid10DigitWithDashDelimiter> ] }
-let testPropValid10DigitWithDash : string -> (string * SwedishPersonalIdentityNumber -> unit) -> Test =
-    testPropertyWithConfig valid10DigitWithDashConfig
-
 
 [<Tests>]
 let tests =
     testList "parse" 
-        [ testPropValid10DigitWithPlus "Can parse valid string with plus delimiter" <|
+        [ testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string with plus delimiter" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
                 pin =! Ok expected
 
-          testPropValid10DigitWithPlus "Can parse valid string for person the year they turn 100" <|
-            fun (input, expected) ->
+          testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string for person the year they turn 100" <|
+            fun (input, expected: SwedishPersonalIdentityNumber) ->
                 let yearTurning100 = 
                     expected.Year 
                     |> Year.value 
@@ -52,13 +46,12 @@ let tests =
                 let pin = input |> SwedishPersonalIdentityNumber.parseInSpecificYear yearTurning100
                 pin =! Ok expected
 
-          testPropValid10DigitWithDash "Can parse valid string with dash delimiter" <|
+          testPropertyWithConfig valid10DigitWithDashConfig "Can parse valid string with dash delimiter" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
-            
                 pin =! Ok expected
 
-          testProp12DigitString "Can parse 12 digit string" <|
+          testPropertyWithConfig pin12DigitStringConfig "Can parse 12 digit string" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
                 pin =! Ok expected

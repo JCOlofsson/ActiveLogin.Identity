@@ -6,11 +6,12 @@ module ActiveLogin.Identity.Swedish.FSharp.Test.SwedishPersonalIdentityNumber_ha
 open Expecto
 open Generators
 open Swensen.Unquote
+open ActiveLogin.Identity.Swedish.FSharp
 
 
 [<Tests>]
 let tests =
     testList "hash" 
-        [ testPropIdentical "Identical pins have the same hash code" <|
-          fun (pin1, pin2) ->
+        [ testPropertyWithConfig twoEqualPinsConfig "Identical pins have the same hash code" <|
+          fun (pin1: SwedishPersonalIdentityNumber, pin2: SwedishPersonalIdentityNumber) ->
             hash pin1 =! hash pin2 ]
