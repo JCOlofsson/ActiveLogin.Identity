@@ -7,7 +7,7 @@ open System.Threading
 
 module SwedishPersonalIdentityNumberTestData =
     let private rng = 
-        // this thread-safe implementation is required to handle running lots of invocations of getRandom in parallel
+        // this thread-safe implementation is required too handle running lots of invocations of getRandom in parallel
         let seedGenerator = Random()
         let localGenerator = new ThreadLocal<Random>(fun _ ->
             lock seedGenerator (fun _ ->
