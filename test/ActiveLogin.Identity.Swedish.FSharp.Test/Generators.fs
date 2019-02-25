@@ -71,22 +71,19 @@ type ValidWithoutChecksum() =
 let validWithoutChecksumConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ValidWithoutChecksum>]}
 let testPropValidWithoutChecksum : string -> (int * int * int * int -> unit) -> Test = testPropertyWithConfig validWithoutChecksumConfig
 
-let pin12DigitString =
-    gen { 
-        let! index = Gen.choose(0, (Array.length SwedishPersonalIdentityNumberTestData.raw12DigitStrings - 1))
-        return SwedishPersonalIdentityNumberTestData.raw12DigitStrings.[index]
-    }
 type Pin12DigitString() =
-    static member Pin12DigitString() : Arbitrary<string> =
-        pin12DigitString |> Arb.fromGen
+    static member Pin12DigitString() : Arbitrary<string * SwedishPersonalIdentityNumber> =
+        gen {
+            let pin = SwedishPersonalIdentityNumberTestData.getRandom()
+            return (SwedishPersonalIdentityNumber.to12DigitString pin, pin)
+        } |> Arb.fromGen
 let pin12DigitStringConfig = 
     { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Pin12DigitString> ] }
-let testProp12DigitString : string -> (string -> unit) -> Test = testPropertyWithConfig pin12DigitStringConfig
+let testProp12DigitString : string -> (string * SwedishPersonalIdentityNumber -> unit) -> Test = testPropertyWithConfig pin12DigitStringConfig
 
 let validPin =
     gen {
-        let! str = pin12DigitString 
-        return PinTestHelpers.quickParse str
+        return SwedishPersonalIdentityNumberTestData.getRandom()
     }
 
 type ValidPin() =

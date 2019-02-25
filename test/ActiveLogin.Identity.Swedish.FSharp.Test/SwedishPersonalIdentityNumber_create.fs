@@ -14,7 +14,7 @@ let defaultValues =
 
 [<Tests>]
 let tests =
-    testList "SwedishPersonalIdentityNumber.create" 
+    testList "create" 
         [ testPropInvalidYear "Invalid year" <|
             fun year ->
                 let result = 
@@ -70,5 +70,4 @@ let tests =
             fun () ->
                 let typ = typeof<SwedishPersonalIdentityNumber>
                 let numConstructors = typ.GetConstructors(BindingFlags.Public) |> Array.length
-                numConstructors =! 0
-        ]
+                numConstructors =! 0 ]
