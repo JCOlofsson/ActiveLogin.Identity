@@ -8,12 +8,19 @@ open Expecto
 open ActiveLogin.Identity.Swedish.FSharp
 open System.Reflection
 open Generators
+open ActiveLogin.Identity.Swedish.FSharp.TestData
+open PinTestHelpers
 
 
 [<Tests>]
 let tests =
     testList "create" 
-        [ testPropertyWithConfig invalidYearConfig "Invalid year" <|
+        [ 
+          testPropertyWithConfig validValuesConfig "valid pin" <|
+            fun values ->
+                let result = values |> SwedishPersonalIdentityNumber.create 
+                result |> Expect.equalPin values
+          testPropertyWithConfig invalidYearConfig "Invalid year" <|
             fun values ->
                 let result = 
                     values

@@ -20,38 +20,21 @@ let quickParse str =
     | Ok p -> p 
     | Error e -> e.ToString() |> failwithf "Test setup error %s"
 
-let private parseYear = 
-    DateTime.Today.Year 
-    |> Year.create 
-    |> function 
-    | Ok y -> y 
-    | Error e -> e |> failwith "Test setup error %A"
-
-let random10DigitWithPlusDelimiter =
-    seq { 
-        for pin in SwedishPersonalIdentityNumberTestData.allPinsShuffled() do
-        let tenDigit = pin |> SwedishPersonalIdentityNumber.to10DigitStringInSpecificYear parseYear
-        if tenDigit.Contains("+") then
-            yield (tenDigit, pin)
-    }
-
-let random10DigitWithDashDelimiter =
-    seq { 
-        for pin in SwedishPersonalIdentityNumberTestData.allPinsShuffled() do
-        let tenDigit = pin |> SwedishPersonalIdentityNumber.to10DigitStringInSpecificYear parseYear
-        if tenDigit.Contains("+") |> not then
-            yield (tenDigit, pin)
-    }
+let pinToValues (pin:SwedishPersonalIdentityNumber) =
+    { Year = pin.Year |> Year.value 
+      Month = pin.Month |> Month.value
+      Day = pin.Day |> Day.value
+      BirthNumber = pin.BirthNumber |> BirthNumber.value
+      Checksum = pin.Checksum |> Checksum.value }
 
 module Expect =
-    let equalPin (expected: SwedishPersonalIdentityNumber) (actual: Result<SwedishPersonalIdentityNumber,_>) =
+    let equalPin (expected: SwedishPersonalIdentityNumberValues) (actual: Result<SwedishPersonalIdentityNumber,_>) =
         actual |> Expect.isOk "should be ok"
         match actual with
         | Error _ -> failwith "test error"
         | Ok pin ->
-            pin.Year =! expected.Year
-            pin.Month =! expected.Month
-            pin.Day =! expected.Day
-            pin.BirthNumber =! expected.BirthNumber
-            pin.Checksum =! expected.Checksum
-
+            pin.Year |> Year.value  =! expected.Year
+            pin.Month |> Month.value =! expected.Month
+            pin.Day |> Day.value =! expected.Day
+            pin.BirthNumber |> BirthNumber.value =! expected.BirthNumber
+            pin.Checksum |> Checksum.value =! expected.Checksum

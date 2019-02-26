@@ -8,9 +8,17 @@ open ActiveLogin.Identity.Swedish.FSharp.TestData
 open PinTestHelpers
 open Generators
 
+type Valid10Digit() =
+    static member Valid10Digit : Arbitrary<string * SwedishPersonalIdentityNumberValues> =
+        gen {
+            let pin = SwedishPersonalIdentityNumberTestData.getRandom()
+            return (pin |> SwedishPersonalIdentityNumber.to10DigitString, pinToValues pin)
+        } |> Arb.fromGen
+let valid10DigitConfig = { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid10Digit> ] }
+
 
 type Valid10DigitWithPlusDelimiter() =
-    static member ValidWithPlusDelimiter : Arbitrary<string * SwedishPersonalIdentityNumber> =
+    static member ValidWithPlusDelimiter : Arbitrary<string * SwedishPersonalIdentityNumberValues> =
         gen {
             return random10DigitWithPlusDelimiter |> Seq.head
         } |> Arb.fromGen
@@ -18,43 +26,65 @@ let valid10DigitWithPlusConfig =
     { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid10DigitWithPlusDelimiter> ] }
 
 type Valid10DigitWithDashDelimiter() =
-    static member ValidWithDashDelimiter : Arbitrary<string * SwedishPersonalIdentityNumber> =
+    static member ValidWithDashDelimiter : Arbitrary<string * SwedishPersonalIdentityNumberValues> =
         gen {
             return random10DigitWithDashDelimiter |> Seq.head
         } |> Arb.fromGen
 let valid10DigitWithDashConfig = 
     { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid10DigitWithDashDelimiter> ] }
 
+let noneDigitOrDelimiterString =
+    gen {
+        let! char = Gen.elements "abcdefghijklmnopqrstuvwxyzååöABCDEFGHIJKLMNOPQRSTUVWXYZÅÅÖ" 
+        return string char
+    }
+
+let yearTurning100 (pin:SwedishPersonalIdentityNumberValues) = 
+    pin.Year 
+    |> (+) 100 
+    |> Year.create 
+    |> function 
+    | Ok y -> y 
+    | Error e -> e |> failwithf "Test setup error %A"
+
 [<Tests>]
 let tests =
     testList "parse" 
-        [ testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string with plus delimiter" <|
+        [ testPropertyWithConfig valid12DigitConfig "Can parse any valid 12-digit string" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
                 pin |> Expect.equalPin expected
 
-          testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid string for person the year they turn 100" <|
-            fun (input, expected: SwedishPersonalIdentityNumber) ->
-                let yearTurning100 = 
-                    expected.Year 
-                    |> Year.value 
-                    |> (+) 100 
-                    |> Year.create 
-                    |> function 
-                    | Ok y -> y 
-                    | Error e -> e |> failwithf "Test setup error %A"
-                let pin = input |> SwedishPersonalIdentityNumber.parseInSpecificYear yearTurning100
-                pin |> Expect.equalPin expected
-
-          testPropertyWithConfig valid10DigitWithDashConfig "Can parse valid string with dash delimiter" <|
+          testPropertyWithConfig valid10DigitConfig "Can parse any valid 10-digit string" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
                 pin |> Expect.equalPin expected
 
-          testPropertyWithConfig pin12DigitStringConfig "Can parse 12 digit string" <|
+          // this is a repeat of a test above, if we are happy with the failure report above we can skip it.
+          testPropertyWithConfig valid10DigitWithPlusConfig "Can parse valid 10-digit string with plus delimiter" <|
             fun (input, expected) ->
                 let pin = input |> SwedishPersonalIdentityNumber.parse
                 pin |> Expect.equalPin expected
+
+          // this is a repeat of a test above, if we are happy with the failure report above we can skip it.
+          testPropertyWithConfig valid10DigitWithDashConfig "Can parse valid 10-digit string with dash delimiter" <|
+            fun (input, expected) ->
+                let pin = input |> SwedishPersonalIdentityNumber.parse
+                pin |> Expect.equalPin expected
+
+          testPropertyWithConfig valid10DigitWithPlusConfig 
+              "Can parse valid 10-digit string with plus delimiter for person the year they turn 100" <|
+            fun (input, expected: SwedishPersonalIdentityNumberValues) ->
+                let pin = input |> SwedishPersonalIdentityNumber.parseInSpecificYear (yearTurning100 expected)
+                pin |> Expect.equalPin expected
+
+        //   testPropertyWithConfig valid10DigitWithDashConfig 
+        //       "Cannot parse 10-digit string with dash after person have turned 100" <|
+        //     fun (input, expected: SwedishPersonalIdentityNumberValues) ->
+        //         let yearTurning100 = yearTurning100 expected
+        //         let pin = input |> SwedishPersonalIdentityNumber.parseInSpecificYear yearTurning100
+        //         pin <>! Ok expected
+          
         ]
 
         // Handled!
@@ -77,7 +107,8 @@ let tests =
         //     Assert.Equal(expectedYear, personalIdentityNumber.Year);
         // }
 
-        // [Theory] Handled!
+        // Handled!
+        // [Theory] 
         // [InlineData("990807-2391", 1999)]
         // [InlineData("180101-2392", 2018)]
         // public void Parses_Year_From_10_Digit_String_When_Dash_Is_Delimiter(string personalIdentityNumberString, int expectedYear)
@@ -86,7 +117,8 @@ let tests =
         //     Assert.Equal(expectedYear, personalIdentityNumber.Year);
         // }
 
-        // [Theory] Handled? Is this test a repeated test from above?
+        // Handled? Is this test a repeated test from above?
+        // [Theory] 
         // [InlineData("990913+9801", 1899)]
         // [InlineData("120211+9986", 1912)]
         // [InlineData("990807-2391", 1999)]
@@ -97,7 +129,8 @@ let tests =
         //     Assert.Equal(expectedYear, personalIdentityNumber.Year);
         // }
 
-        // [Theory] Handled
+        // Handled
+        // [Theory] 
         // [InlineData("990913+9801", 09)]
         // [InlineData("120211+9986", 02)]
         // [InlineData("990807-2391", 08)]
@@ -108,7 +141,8 @@ let tests =
         //     Assert.Equal(expectedMonth, personalIdentityNumber.Month);
         // }
 
-        // [Theory] Handled
+        // Handled
+        // [Theory] 
         // [InlineData("990913+9801", 13)]
         // [InlineData("120211+9986", 11)]
         // [InlineData("990807-2391", 07)]
@@ -119,7 +153,8 @@ let tests =
         //     Assert.Equal(expectedDay, personalIdentityNumber.Day);
         // }
 
-        // [Theory] Handled
+        // Handled
+        // [Theory] 
         // [InlineData("990913+9801", 980)]
         // [InlineData("120211+9986", 998)]
         // [InlineData("990807-2391", 239)]
@@ -130,7 +165,8 @@ let tests =
         //     Assert.Equal(expectedBirthNumber, personalIdentityNumber.BirthNumber);
         // }
 
-        // [Theory] Handled
+        // Handled
+        // [Theory] 
         // [InlineData("990913+9801", 1)]
         // [InlineData("120211+9986", 6)]
         // [InlineData("990807-2391", 1)]
