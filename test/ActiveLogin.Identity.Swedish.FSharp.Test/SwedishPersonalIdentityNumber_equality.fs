@@ -8,7 +8,7 @@ open Swensen.Unquote
 open Expecto
 open ActiveLogin.Identity.Swedish.FSharp
 open ActiveLogin.Identity.Swedish.FSharp.TestData
-open Generators
+open Arbitraries
 open FsCheck
 
 

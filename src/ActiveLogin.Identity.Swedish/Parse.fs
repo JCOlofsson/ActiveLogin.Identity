@@ -69,7 +69,7 @@ let parse parseYear =
             | TwelveDigits str ->
                 // YYYYMMDDbbbc
                 // 012345678901
-                return { Year = str.[0..3] |> int
+                return { Year = str.[0..3] |> int 
                          Month = str.[4..5] |> int
                          Day = str.[6..7] |> int
                          BirthNumber = str.[8..10] |> int

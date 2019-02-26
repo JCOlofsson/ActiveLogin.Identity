@@ -4,7 +4,7 @@
 /// </remarks>
 module ActiveLogin.Identity.Swedish.FSharp.Test.SwedishPersonalIdentityNumber_hash
 open Expecto
-open Generators
+open Arbitraries
 open Swensen.Unquote
 open ActiveLogin.Identity.Swedish.FSharp
 

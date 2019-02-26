@@ -38,3 +38,10 @@ module Expect =
             pin.Day |> Day.value =! expected.Day
             pin.BirthNumber |> BirthNumber.value =! expected.BirthNumber
             pin.Checksum |> Checksum.value =! expected.Checksum
+
+module Result =
+    let iter f res = 
+        match res with
+        | Ok r -> f r
+        | Error e -> ()
+    

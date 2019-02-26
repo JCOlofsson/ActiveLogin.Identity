@@ -27,6 +27,18 @@ let validValues =
         return stringToValues str
     }
 
+let random12Digit = 
+    gen {
+        let! str = valid12Digit
+        return (str, stringToValues str)
+    }
+
+let random10Digit =
+    gen {
+        let pin = SwedishPersonalIdentityNumberTestData.getRandom()
+        return (pin |> SwedishPersonalIdentityNumber.to10DigitString, pinToValues pin)
+    }
+
 let private parseYear = 
     DateTime.Today.Year 
     |> Year.create 
@@ -42,7 +54,7 @@ let random10DigitWithPlusDelimiter =
             yield (tenDigit, pin |> pinToValues)
     }
 
-let random10DigitWithDashDelimiter =
+let random10DigitWithHyphenDelimiter =
     seq { 
         for pin in SwedishPersonalIdentityNumberTestData.allPinsShuffled() do
         let tenDigit = pin |> SwedishPersonalIdentityNumber.to10DigitStringInSpecificYear parseYear
@@ -59,9 +71,6 @@ let invalidYear =
         let! values = validValues
         return { values with Year = year }
     }
-type InvalidYearGen() =
-    static member Year() : Arbitrary<SwedishPersonalIdentityNumberValues> = Arb.fromGen invalidYear
-let invalidYearConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<InvalidYearGen> ] }
 
 let invalidMonth = 
     gen {
@@ -72,9 +81,6 @@ let invalidMonth =
         let! values = validValues
         return { values with Month = month }
     }
-type InvalidMonthGen() = 
-    static member Month() : Arbitrary<SwedishPersonalIdentityNumberValues> = Arb.fromGen invalidMonth
-let invalidMonthConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<InvalidMonthGen> ] }
 
 let invalidDay = 
     gen {
@@ -84,9 +90,6 @@ let invalidDay =
                                Gen.choose(daysInMonth + 1, Int32.MaxValue) ]
         return { values with Day = day }
     }
-type InvalidDayGen() =
-    static member Day() : Arbitrary<SwedishPersonalIdentityNumberValues> = Arb.fromGen invalidDay
-let invalidDayConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<InvalidDayGen> ] }
 
 let invalidBirthNumber = 
     gen {
@@ -95,39 +98,34 @@ let invalidBirthNumber =
         let! values = validValues
         return { values with BirthNumber = birthNumber }
     }
-type InvalidBirthNumberGen() =
-    static member BirthNumber() : Arbitrary<SwedishPersonalIdentityNumberValues> = Arb.fromGen invalidBirthNumber
-let invalidBirthNumberConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<InvalidBirthNumberGen> ] }
-
-type ValidValues() =
-    static member ValidValues() : Arbitrary<SwedishPersonalIdentityNumberValues> = 
-        gen { return! validValues } 
-        |> Arb.fromGen 
-let validValuesConfig = { FsCheckConfig.defaultConfig with arbitrary = [ typeof<ValidValues> ] }
-
-type Valid12Digit() =
-    static member Valid12Digit() : Arbitrary<string * SwedishPersonalIdentityNumberValues> =
-        gen {
-            let! str = valid12Digit
-            return (str, stringToValues str)
-        } |> Arb.fromGen
-let valid12DigitConfig = 
-    { FsCheckConfig.defaultConfig with arbitrary = [ typeof<Valid12Digit> ] }
 
 let validPin =
     gen {
         return SwedishPersonalIdentityNumberTestData.getRandom()
     }
 
-type ValidPin() =
-    static member ValidPin() : Arbitrary<SwedishPersonalIdentityNumber> =
-        validPin |> Arb.fromGen
-let validPinConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<ValidPin>]}
+let printableAsciiChar =
+    let chars = [ 32..47 ] @ [ 58..126 ] |> Array.ofList |> Array.map char
+    chooseFromArray chars
 
-type TwoEqualPins() =
-    static member TwoEqualPins() : Arbitrary<SwedishPersonalIdentityNumber * SwedishPersonalIdentityNumber> =
-        gen {
-            let! pin = validPin
-            return (pin, pin)
-        } |> Arb.fromGen
-let twoEqualPinsConfig = { FsCheckConfig.defaultConfig with arbitrary = [typeof<TwoEqualPins>] }
+let printableAscii =
+    gen {
+        let! charsGen = Gen.listOf printableAsciiChar
+        return charsGen |> Array.ofList |> String
+    }
+
+let printableAsciiCharWithoutPlus =
+    let chars = [ 32..42 ] @ [ 44..47] @ [ 58..126 ] |> Array.ofList |> Array.map char
+    chooseFromArray chars
+
+let singlePrintableAsciiString =
+    gen {
+        let! char = printableAsciiChar
+        return char |> Array.singleton |> String
+    }
+
+let printableAsciiExceptPlus =
+    gen {
+        let! charsGen = Gen.listOf printableAsciiCharWithoutPlus
+        return charsGen |> Array.ofList |> String
+    }
